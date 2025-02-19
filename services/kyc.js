@@ -171,6 +171,9 @@ class KycService {
         phone: kyc.userId?.phone || "N/A",
         selfieImage: buildFileUrl(req, kyc.selfieImage),
         documentImage: buildFileUrl(req, kyc.documentImage),
+        documentBackImage: kyc?.documentBackImage
+          ? buildFileUrl(req, kyc.documentBackImage)
+          : null,
         kycStatus: kyc.kycStatus,
         nationality: kyc.nationality,
         dob: kyc.dob,
@@ -240,6 +243,9 @@ class KycService {
         email: kyc.userId?.email || "N/A",
         selfieImage: buildFileUrl(req, kyc.selfieImage),
         documentImage: buildFileUrl(req, kyc.documentImage),
+        documentBackImage: kyc?.documentBackImage
+          ? buildFileUrl(req, kyc.documentBackImage)
+          : null,
         kycStatus: kyc.kycStatus,
         createdAt: kyc.createdAt,
         updatedAt: kyc.updatedAt,
