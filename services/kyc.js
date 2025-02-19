@@ -124,26 +124,39 @@ class KycService {
       const moderation = await Moderation.findOne({ kycId });
       let formattedModeration;
       if (moderation) {
+        // formattedModeration = {
+        //   id: moderation._id,
+        //   status: moderation.status,
+        //   errorLogs: moderation.errorLogs,
+        //   ocr: {
+        //     ocrData: moderation.ocrData, // This includes any OCR data details
+        //     ocrMatch: moderation.ocrMatch, // Indicates if OCR data matched the KYC data
+        //     ocrMismatchDetails: moderation.ocrMismatchDetails,
+        //   },
+        //   faceMatch: {
+        //     match: moderation.faceMatch.match,
+        //     matchConfidence: moderation.faceMatch.matchConfidence,
+        //   },
+        //   liveliness: {
+        //     passed: moderation.liveliness.passed,
+        //     livelinessDetails: moderation.liveliness.livelinessDetails,
+        //     livelinessResults: moderation.liveliness.livelinessResults,
+        //   },
+        //   createdAt: moderation.createdAt,
+        //   updatedAt: moderation.updatedAt,
+        // };
         formattedModeration = {
           id: moderation._id,
           status: moderation.status,
-          errorLogs: moderation.errorLogs,
-          ocr: {
-            ocrData: moderation.ocrData, // This includes any OCR data details
-            ocrMatch: moderation.ocrMatch, // Indicates if OCR data matched the KYC data
-            ocrMismatchDetails: moderation.ocrMismatchDetails,
+          errorLogs: moderation?.errorLogs,
+          document: {
+            liveness: moderation?.idLiveData,
+            ocr: moderation?.idRecogData,
           },
-          faceMatch: {
-            match: moderation.faceMatch.match,
-            matchConfidence: moderation.faceMatch.matchConfidence,
+          face: {
+            liveness: moderation?.faceLiveData,
+            comparison: moderation?.faceRecogData,
           },
-          liveliness: {
-            passed: moderation.liveliness.passed,
-            livelinessDetails: moderation.liveliness.livelinessDetails,
-            livelinessResults: moderation.liveliness.livelinessResults,
-          },
-          createdAt: moderation.createdAt,
-          updatedAt: moderation.updatedAt,
         };
       }
 

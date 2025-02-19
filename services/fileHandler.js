@@ -55,6 +55,65 @@ const saveFileFromBuffer = async (buffer, filePath, mimetype) => {
 };
 
 // A utility to ensure directory existence and file saving
+// const saveKycAssets = async (req) => {
+//   const kycId = req.params.kycId;
+
+//   // Define the folder path
+//   const folderPath = path.join(__dirname, "../public/kycAssets", kycId);
+
+//   // Create the folder if it doesn't exist
+//   if (!fs.existsSync(folderPath)) {
+//     fs.mkdirSync(folderPath, { recursive: true });
+//   }
+
+//   // Define the relative file paths for both selfie and document
+//   let selfieRelativePath = `/public/kycAssets/${kycId}/selfie-${kycId}.${
+//     req.files.selfie[0].mimetype.split("/")[1]
+//   }`;
+//   let documentRelativePath = `/public/kycAssets/${kycId}/doc-${kycId}.${
+//     req.files.document[0].mimetype.split("/")[1]
+//   }`;
+
+//   // Define the absolute file paths for both selfie and document
+//   let selfieAbsolutePath = path.join(__dirname, `..${selfieRelativePath}`);
+//   let documentAbsolutePath = path.join(__dirname, `..${documentRelativePath}`);
+
+//   // Save the files from buffers to disk (convert .jpg to .jpeg if necessary)
+//   selfieAbsolutePath = await saveFileFromBuffer(
+//     req.files.selfie[0].buffer,
+//     selfieAbsolutePath,
+//     req.files.selfie[0].mimetype
+//   );
+//   documentAbsolutePath = await saveFileFromBuffer(
+//     req.files.document[0].buffer,
+//     documentAbsolutePath,
+//     req.files.document[0].mimetype
+//   );
+
+//   // Update relative paths if conversion occurred
+//   if (selfieAbsolutePath !== selfieRelativePath) {
+//     selfieRelativePath = `/public/kycAssets/${kycId}/${path.basename(
+//       selfieAbsolutePath
+//     )}`;
+//   }
+//   if (documentAbsolutePath !== documentRelativePath) {
+//     documentRelativePath = `/public/kycAssets/${kycId}/${path.basename(
+//       documentAbsolutePath
+//     )}`;
+//   }
+
+//   return {
+//     selfie: {
+//       relativePath: selfieRelativePath,
+//       absolutePath: selfieAbsolutePath,
+//     },
+//     document: {
+//       relativePath: documentRelativePath,
+//       absolutePath: documentAbsolutePath,
+//     },
+//   };
+// };
+
 const saveKycAssets = async (req) => {
   const kycId = req.params.kycId;
 
@@ -66,19 +125,27 @@ const saveKycAssets = async (req) => {
     fs.mkdirSync(folderPath, { recursive: true });
   }
 
-  // Define the relative file paths for both selfie and document
+  // Define the relative file paths for selfie and document
   let selfieRelativePath = `/public/kycAssets/${kycId}/selfie-${kycId}.${
     req.files.selfie[0].mimetype.split("/")[1]
   }`;
   let documentRelativePath = `/public/kycAssets/${kycId}/doc-${kycId}.${
     req.files.document[0].mimetype.split("/")[1]
   }`;
+  let documentBackRelativePath = req.files.documentBack
+    ? `/public/kycAssets/${kycId}/doc-back-${kycId}.${
+        req.files.documentBack[0].mimetype.split("/")[1]
+      }`
+    : null;
 
-  // Define the absolute file paths for both selfie and document
+  // Define the absolute file paths for selfie and document
   let selfieAbsolutePath = path.join(__dirname, `..${selfieRelativePath}`);
   let documentAbsolutePath = path.join(__dirname, `..${documentRelativePath}`);
+  let documentBackAbsolutePath = documentBackRelativePath
+    ? path.join(__dirname, `..${documentBackRelativePath}`)
+    : null;
 
-  // Save the files from buffers to disk (convert .jpg to .jpeg if necessary)
+  // Save the files from buffers to disk
   selfieAbsolutePath = await saveFileFromBuffer(
     req.files.selfie[0].buffer,
     selfieAbsolutePath,
@@ -90,27 +157,36 @@ const saveKycAssets = async (req) => {
     req.files.document[0].mimetype
   );
 
-  // Update relative paths if conversion occurred
-  if (selfieAbsolutePath !== selfieRelativePath) {
-    selfieRelativePath = `/public/kycAssets/${kycId}/${path.basename(
-      selfieAbsolutePath
-    )}`;
-  }
-  if (documentAbsolutePath !== documentRelativePath) {
-    documentRelativePath = `/public/kycAssets/${kycId}/${path.basename(
-      documentAbsolutePath
-    )}`;
+  let documentBackResult = null;
+  if (req.files.documentBack) {
+    documentBackAbsolutePath = await saveFileFromBuffer(
+      req.files.documentBack[0].buffer,
+      documentBackAbsolutePath,
+      req.files.documentBack[0].mimetype
+    );
+
+    documentBackResult = {
+      relativePath: `/public/kycAssets/${kycId}/${path.basename(
+        documentBackAbsolutePath
+      )}`,
+      absolutePath: documentBackAbsolutePath,
+    };
   }
 
   return {
     selfie: {
-      relativePath: selfieRelativePath,
+      relativePath: `/public/kycAssets/${kycId}/${path.basename(
+        selfieAbsolutePath
+      )}`,
       absolutePath: selfieAbsolutePath,
     },
     document: {
-      relativePath: documentRelativePath,
+      relativePath: `/public/kycAssets/${kycId}/${path.basename(
+        documentAbsolutePath
+      )}`,
       absolutePath: documentAbsolutePath,
     },
+    documentBack: documentBackResult, // Includes document back if provided
   };
 };
 

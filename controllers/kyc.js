@@ -95,9 +95,115 @@ class KycController {
   /**
    * Handle uploading KYC assets (selfie and document) and saving KYC details
    */
+  // static async uploadKycAssets(req, res) {
+  //   try {
+  //     const kycId = req.params.kycId;
+
+  //     // Ensure both files (selfie and document) are uploaded
+  //     if (!req.files || !req.files.selfie || !req.files.document) {
+  //       return res.status(400).json({
+  //         message: "Both selfie and document images are required.",
+  //       });
+  //     }
+
+  //     // Save KYC assets (selfie and document) using the utility
+  //     const { selfie, document, documentBack } = await saveKycAssets(req);
+
+  //     // Ensure the files exist after saving
+  //     if (!fs.existsSync(selfie.absolutePath)) {
+  //       throw new Error(`Selfie file not found at ${selfie.absolutePath}`);
+  //     }
+  //     if (!fs.existsSync(document.absolutePath)) {
+  //       throw new Error(`Document file not found at ${document.absolutePath}`);
+  //     }
+
+  //     // Build full URLs for selfie and document paths
+  //     const selfieUrl = buildFileUrl(req, selfie.relativePath);
+  //     const documentUrl = buildFileUrl(req, document.relativePath);
+  //     let documentBackUrl;
+  //     if (documentBack) {
+  //       if (!fs.existsSync(documentBack.absolutePath)) {
+  //         throw new Error(
+  //           `Document Back file not found at ${documentBack.absolutePath}`
+  //         );
+  //       }
+  //       documentBackUrl = buildFileUrl(req, documentBack?.relativePath);
+  //     }
+
+  //     // Update the KYC entry in the database with the file paths
+  //     const kyc = await Kyc.findByIdAndUpdate(
+  //       kycId,
+  //       {
+  //         selfieImage: selfie.relativePath,
+  //         documentImage: document.relativePath,
+  //         documentBackImage: documentBack ? documentBack.relativePath : null,
+  //       },
+  //       { new: true }
+  //     );
+
+  //     if (!kyc) {
+  //       return res.status(404).json({ message: "KYC not found" });
+  //     }
+  //     const allowedBothSideDocs = ["aadhaar-card", "voter-id"];
+
+  //     if (allowedBothSideDocs.includes(kyc.idType)) {
+  //       if (!documentBack) {
+  //         return res.status(400).json({
+  //           message: "Document back image is required for this ID type.",
+  //         });
+  //       }
+  //     }
+
+  //     const formattedRes = {
+  //       id: kyc._id,
+  //       selfieImage: selfieUrl,
+  //       documentImage: documentUrl,
+  //       documentBackImage: documentBack ? documentBackUrl : null,
+  //     };
+
+  //     const user = {
+  //       id: req.user._id,
+  //       name: `${req.user.firstName} ${req.user.lastName}`,
+  //       email: req.user.email,
+  //       gender: req.user.gender,
+  //     };
+
+  //     // Combine KYC data with authenticated user data
+  //     const wholeKyc = { ...kyc.toObject(), user };
+
+  //     //----------------------****************------------------------------------------//
+  //     // Trigger Moderation Service for Face Recognition and OCR asynchronously
+  //     runModerationChecks(
+  //       kycId,
+  //       document.absolutePath,
+  //       documentBack.absolutePath || "",
+  //       selfie.absolutePath,
+  //       wholeKyc
+  //     );
+  //     //----------------------****************------------------------------------------//
+
+  //     return res.status(200).json({
+  //       message: "KYC assets uploaded successfully",
+  //       kyc: formattedRes,
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     return res.status(500).json({
+  //       message: "Error uploading KYC assets",
+  //       error: error.message,
+  //     });
+  //   }
+  // }
+
   static async uploadKycAssets(req, res) {
     try {
       const kycId = req.params.kycId;
+
+      // Fetch KYC entry first
+      const kyc = await Kyc.findById(kycId);
+      if (!kyc) {
+        return res.status(404).json({ message: "KYC not found" });
+      }
 
       // Ensure both files (selfie and document) are uploaded
       if (!req.files || !req.files.selfie || !req.files.document) {
@@ -107,40 +213,40 @@ class KycController {
       }
 
       // Save KYC assets (selfie and document) using the utility
-      const { selfie, document } = await saveKycAssets(req);
+      const savedAssets = await saveKycAssets(req);
+      if (!savedAssets) {
+        throw new Error("Failed to save KYC assets.");
+      }
+
+      const { selfie, document, documentBack } = savedAssets;
 
       // Ensure the files exist after saving
-      if (!fs.existsSync(selfie.absolutePath)) {
-        throw new Error(`Selfie file not found at ${selfie.absolutePath}`);
+      if (
+        !fs.existsSync(selfie.absolutePath) ||
+        !fs.existsSync(document.absolutePath)
+      ) {
+        throw new Error("Saved files not found on disk.");
       }
-      if (!fs.existsSync(document.absolutePath)) {
-        throw new Error(`Document file not found at ${document.absolutePath}`);
+      if (documentBack && !fs.existsSync(documentBack.absolutePath)) {
+        throw new Error("Document back file not found on disk.");
       }
 
-      // Build full URLs for selfie and document paths
+      // Build full URLs for assets
       const selfieUrl = buildFileUrl(req, selfie.relativePath);
       const documentUrl = buildFileUrl(req, document.relativePath);
+      const documentBackUrl = documentBack
+        ? buildFileUrl(req, documentBack.relativePath)
+        : null;
 
-      // Update the KYC entry in the database with the file paths
-      const kyc = await Kyc.findByIdAndUpdate(
-        kycId,
-        {
-          selfieImage: selfie.relativePath,
-          documentImage: document.relativePath,
-        },
-        { new: true }
-      );
+      const allowedBothSideDocs = ["aadhaar-card", "voter-id"];
 
-      if (!kyc) {
-        return res.status(404).json({ message: "KYC not found" });
+      if (allowedBothSideDocs.includes(kyc.idType) && !documentBack) {
+        return res.status(400).json({
+          message: "Document back image is required for this ID type.",
+        });
       }
 
-      const formattedRes = {
-        id: kyc._id,
-        selfieImage: selfieUrl,
-        documentImage: documentUrl,
-      };
-
+      // Combine KYC data with authenticated user data
       const user = {
         id: req.user._id,
         name: `${req.user.firstName} ${req.user.lastName}`,
@@ -148,7 +254,6 @@ class KycController {
         gender: req.user.gender,
       };
 
-      // Combine KYC data with authenticated user data
       const wholeKyc = { ...kyc.toObject(), user };
 
       //----------------------****************------------------------------------------//
@@ -156,18 +261,36 @@ class KycController {
       runModerationChecks(
         kycId,
         document.absolutePath,
-        document.back || "",
+        documentBack ? documentBack.absolutePath : "",
         selfie.absolutePath,
         wholeKyc
       );
       //----------------------****************------------------------------------------//
+
+      // Update the KYC entry in the database only after validation passes
+      const updatedKyc = await Kyc.findByIdAndUpdate(
+        kycId,
+        {
+          selfieImage: selfie.relativePath,
+          documentImage: document.relativePath,
+          documentBackImage: documentBack ? documentBack.relativePath : null,
+        },
+        { new: true }
+      );
+
+      const formattedRes = {
+        id: updatedKyc._id,
+        selfieImage: selfieUrl,
+        documentImage: documentUrl,
+        documentBackImage: documentBackUrl,
+      };
 
       return res.status(200).json({
         message: "KYC assets uploaded successfully",
         kyc: formattedRes,
       });
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       return res.status(500).json({
         message: "Error uploading KYC assets",
         error: error.message,

@@ -7,6 +7,7 @@ const sanitizeAadharData = (ocrData) => {
     name: ocrData.name.replace(/\^/g, "").trim(), // Remove special characters like '^'
     dateOfBirth: ocrData.dateOfBirth, // DOB
     firstIssueDate: ocrData.firstIssueDate, // id issue date
+    address: ocrData?.address.replace(/\^/g, "").trim(), // Remove special characters
   };
   return modOcrData;
 };
@@ -18,6 +19,8 @@ const sanitizeModKycDataAadhar = (kycData) => {
     name: kycData.user.name.replace(/\^/g, "").trim(), // Remove special characters like '^'
     dateOfBirth: formatDate(kycData.dob), // DOB
     firstIssueDate: formatDate(kycData.idIssueDate), //  id issue date
+    //for address address line 1,2 city state zipcode
+    address: `${kycData.address.line1}, ${kycData.address.line2}, ${kycData.address.city}, ${kycData.address.state}, ${kycData.address.zipcode}`,
   };
   return modKycData;
 };

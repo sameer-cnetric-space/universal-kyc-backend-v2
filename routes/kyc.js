@@ -61,6 +61,7 @@ router.post(
   upload.fields([
     { name: "selfie", maxCount: 1 },
     { name: "document", maxCount: 1 },
+    { name: "documentBack", maxCount: 1 }, // Added documentBack as an optional field
   ]),
   //checkImageQualityMiddleware,
   checkKycExists,

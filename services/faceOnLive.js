@@ -1,4 +1,8 @@
-const { connectClient, handle_file } = require("../config/faceOnLive/client"); // Import the new connection method
+const {
+  connectClient,
+  connectClient2,
+  handle_file,
+} = require("../config/faceOnLive/client"); // Import the new connection method
 
 class FaceOnLiveAPI {
   static async idRecognition(frontImage, backImage) {
@@ -19,6 +23,18 @@ class FaceOnLiveAPI {
       const client = await connectClient();
       return await client.predict("/id_recognition_oneside", {
         front: handle_file(frontImage),
+      });
+    } catch (error) {
+      console.error("❌ Error in ID Recognition One Side:", error.message);
+      return null;
+    }
+  }
+
+  static async idLiveness(frontImage) {
+    try {
+      const client = await connectClient2();
+      return await client.predict("/id_liveness", {
+        path: handle_file(frontImage),
       });
     } catch (error) {
       console.error("❌ Error in ID Recognition One Side:", error.message);

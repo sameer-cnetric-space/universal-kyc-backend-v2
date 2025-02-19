@@ -70,6 +70,9 @@ const kycSchema = new mongoose.Schema(
     documentImage: {
       type: String, // Store the image URL or file path here
     },
+    documentBackImage: {
+      type: String,
+    },
     selfieImage: {
       type: String, // Store the image URL or file path here
     },

@@ -175,10 +175,11 @@ const runModerationChecks = async (
     let idRecogData = {};
     let faceRecogData = {};
     let faceLiveData = {};
+    let idLiveData = {};
 
     // Define allowed document types
-    const allowedOneSideDocs = ["aadhaar-card", "passport", "dl", "pan-card"];
-    const allowedBothSideDocs = ["voter-id"];
+    const allowedOneSideDocs = ["passport", "dl", "pan-card"];
+    const allowedBothSideDocs = ["aadhaar-card", "voter-id"];
 
     // 1️⃣ **ID Recognition Based on Document Type**
     if (kycData?.idType) {
@@ -206,7 +207,10 @@ const runModerationChecks = async (
         idRecogData.isMatch = isMatch;
 
         if (!isMatch) {
-          errorLogs.push(...mismatchResults);
+          //console.log(mismatchResults);
+          idRecogData.mismatchResults = mismatchResults
+            ? mismatchResults
+            : null;
         }
       } else {
         errorLogs.push(
@@ -229,6 +233,13 @@ const runModerationChecks = async (
       errorLogs
     );
 
+    // 4️⃣ **ID Liveness Detection**
+    idLiveData = await handleAPICall(
+      "ID Liveness check",
+      () => FaceOnLiveAPI.idLiveness(frontDocumentPath),
+      errorLogs
+    );
+
     // Determine final status
     const status = errorLogs.length === 0 ? "Completed" : "Failed";
 
@@ -237,6 +248,7 @@ const runModerationChecks = async (
       idRecogData,
       faceRecogData,
       faceLiveData,
+      idLiveData,
       errorLogs,
       status,
     });
@@ -268,7 +280,7 @@ const runModerationChecks = async (
 // 🔹 Helper function to handle API calls and error logging
 const handleAPICall = async (taskName, apiCall, errorLogs) => {
   try {
-    console.log(`Performing ${taskName}...`);
+    //console.log(`Performing ${taskName}...`);
     const result = await apiCall();
     console.log(JSON.stringify(result));
     if (!result) {
