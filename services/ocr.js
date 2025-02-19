@@ -1,6 +1,9 @@
 const { handle_file, Client } = require("../static/ocr-sdk/index.min.js");
 
 const { compareStrings } = require("../utils/stringComparison"); // Utility for string comparison
+const {
+  compareAddressApproximately,
+} = require("../utils/addressComparison.js"); // Utility for address comparison
 
 // Import document-specific sanitizers
 const {
@@ -154,13 +157,27 @@ const compareDocumentByType = (documentType, ocrData, kycData) => {
 
   // Store comparison results with the field names for debugging
   const comparisonResults = Object.keys(sanitizedOcrData).map((field) => {
-    const isMatch = compareStrings(
-      sanitizedOcrData[field],
-      sanitizedKycData[field]
-    );
+    let isMatch;
+    let addressSimilarity;
+
+    if (field === "address") {
+      const address = compareAddressApproximately(
+        sanitizedOcrData[field],
+        sanitizedKycData[field]
+      );
+      isMatch = address?.result;
+      addressSimilarity = address?.similarity;
+    } else {
+      isMatch = compareStrings(
+        sanitizedOcrData[field],
+        sanitizedKycData[field]
+      );
+    }
+
     return {
       field,
       isMatch,
+      addressSimilarity,
       ocrValue: sanitizedOcrData[field],
       kycValue: sanitizedKycData[field],
     };
@@ -170,18 +187,23 @@ const compareDocumentByType = (documentType, ocrData, kycData) => {
   const mismatchResults = {};
 
   // Log the comparison results and capture mismatches
-  comparisonResults.forEach(({ field, isMatch, ocrValue, kycValue }) => {
-    if (!isMatch) {
-      mismatchResults[field] = {
-        ocrValue,
-        kycValue,
-        reason: `Mismatch: OCR value (${ocrValue}) does not match KYC value (${kycValue})`,
-      };
-      // console.log(
-      //   `Mismatch: OCR value (${ocrValue}) does not match KYC value (${kycValue})`
-      // );
+  comparisonResults.forEach(
+    ({ field, isMatch, ocrValue, kycValue, addressSimilarity = null }) => {
+      if (!isMatch) {
+        mismatchResults[field] = {
+          ocrValue,
+          kycValue,
+          reason: `Mismatch: OCR value (${ocrValue}) does not match KYC value (${kycValue})`,
+        };
+        if (field === "address") {
+          mismatchResults[field].similarityScore = addressSimilarity;
+        }
+        // console.log(
+        //   `Mismatch: OCR value (${ocrValue}) does not match KYC value (${kycValue})`
+        // );
+      }
     }
-  });
+  );
 
   // Return an object containing isMatch and mismatchResults
   return {

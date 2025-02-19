@@ -16,11 +16,11 @@ let client2; // Singleton instance for ID Live
 const connectClient = async () => {
   if (!client) {
     try {
-      console.log("🔄 Connecting to FaceOnLive...");
+      //console.log("🔄 Connecting to FaceOnLive...");
       client = await Client.connect(SERVER_URL, {
         hf_token: ACCESS_TOKEN,
       });
-      console.log("✅ FaceOnLive Connection Successful!");
+      //console.log("✅ FaceOnLive Connection Successful!");
     } catch (error) {
       console.error("❌ Error connecting to FaceOnLive:", error.message);
       process.exit(1); // Exit process if connection fails
@@ -32,11 +32,11 @@ const connectClient = async () => {
 const connectClient2 = async () => {
   if (!client2) {
     try {
-      console.log("🔄 Connecting to FaceOnLive...");
+      //console.log("🔄 Connecting to FaceOnLive...");
       client2 = await Client.connect(SERVER_URL_2, {
         hf_token: ACCESS_TOKEN,
       });
-      console.log("✅ FaceOnLive Connection Successful!");
+      //console.log("✅ FaceOnLive Connection Successful!");
     } catch (error) {
       console.error("❌ Error connecting to FaceOnLive:", error.message);
       process.exit(1); // Exit process if connection fails

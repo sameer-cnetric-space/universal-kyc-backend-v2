@@ -282,7 +282,7 @@ const handleAPICall = async (taskName, apiCall, errorLogs) => {
   try {
     //console.log(`Performing ${taskName}...`);
     const result = await apiCall();
-    console.log(JSON.stringify(result));
+    //console.log(JSON.stringify(result));
     if (!result) {
       errorLogs.push(`${taskName} failed.`);
     }

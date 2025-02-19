@@ -20,7 +20,9 @@ const sanitizeModKycDataAadhar = (kycData) => {
     dateOfBirth: formatDate(kycData.dob), // DOB
     firstIssueDate: formatDate(kycData.idIssueDate), //  id issue date
     //for address address line 1,2 city state zipcode
-    address: `${kycData.address.line1}, ${kycData.address.line2}, ${kycData.address.city}, ${kycData.address.state}, ${kycData.address.zipcode}`,
+    address: `${kycData.addressLine1 || ""}, ${kycData.addressLine2 || ""}, ${
+      kycData.city || ""
+    }, ${kycData.state || ""}, ${kycData.zipCode || ""}`,
   };
   return modKycData;
 };
