@@ -3,9 +3,9 @@ const { formatDate } = require("../dateFormatter");
 // Voter ID OCR sanitization
 const sanitizeVoterIdData = (ocrData) => {
   const modOcrData = {
-    documentNumber: ocrData.documentNumber.trim(), // Voter ID number
-    name: ocrData.name.replace(/\^/g, "").trim(), // Remove special characters like '^'
-    dateOfBirth: ocrData.dateOfBirth, // DOB
+    documentNumber: ocrData?.documentNumber?.trim() || "", // Voter ID number
+    name: ocrData?.name?.replace(/\^/g, "").trim() || "", // Remove special characters like '^'
+    dateOfBirth: ocrData?.dateOfBirth || "", // DOB
   };
   return modOcrData;
 };
@@ -13,9 +13,9 @@ const sanitizeVoterIdData = (ocrData) => {
 // Voter ID KYC sanitization
 const sanitizeModKycDataVoterId = (kycData) => {
   const modKycData = {
-    documentNumber: kycData.idNumber.trim(), // Voter ID number
-    name: kycData.user.name.replace(/\^/g, "").trim(), // Remove special characters like '^'
-    dateOfBirth: formatDate(kycData.dob), // DOB
+    documentNumber: kycData?.idNumber?.trim() || "", // Voter ID number
+    name: kycData?.user?.name?.replace(/\^/g, "").trim() || "", // Remove special characters like '^'
+    dateOfBirth: formatDate(kycData?.dob || ""), // DOB
   };
   return modKycData;
 };
