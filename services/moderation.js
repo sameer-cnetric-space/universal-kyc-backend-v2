@@ -175,11 +175,17 @@ const runModerationChecks = async (
     let idRecogData = {};
     let faceRecogData = {};
     let faceLiveData = {};
-    let idLiveData = {};
+    //let idLiveData = {};
 
     // Define allowed document types
-    const allowedOneSideDocs = ["passport", "dl", "pan-card"];
-    const allowedBothSideDocs = ["aadhaar-card", "voter-id"];
+    const allowedOneSideDocs = [
+      "passport",
+      "dl",
+      "pan-card",
+      "aadhaar-card",
+      "voter-id",
+    ];
+    const allowedBothSideDocs = [];
 
     // 1️⃣ **ID Recognition Based on Document Type**
     if (kycData?.idType) {
@@ -234,11 +240,11 @@ const runModerationChecks = async (
     );
 
     // 4️⃣ **ID Liveness Detection**
-    idLiveData = await handleAPICall(
-      "ID Liveness check",
-      () => FaceOnLiveAPI.idLiveness(frontDocumentPath),
-      errorLogs
-    );
+    // idLiveData = await handleAPICall(
+    //   "ID Liveness check",
+    //   () => FaceOnLiveAPI.idLiveness(frontDocumentPath),
+    //   errorLogs
+    // );
 
     // Determine final status
     const status = errorLogs.length === 0 ? "Completed" : "Failed";
@@ -248,7 +254,7 @@ const runModerationChecks = async (
       idRecogData,
       faceRecogData,
       faceLiveData,
-      idLiveData,
+      //idLiveData,
       errorLogs,
       status,
     });

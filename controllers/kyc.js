@@ -238,13 +238,13 @@ class KycController {
         ? buildFileUrl(req, documentBack.relativePath)
         : null;
 
-      const allowedBothSideDocs = ["aadhaar-card", "voter-id"];
+      // const allowedBothSideDocs = ["aadhaar-card", "voter-id"];
 
-      if (allowedBothSideDocs.includes(kyc.idType) && !documentBack) {
-        return res.status(400).json({
-          message: "Document back image is required for this ID type.",
-        });
-      }
+      // if (allowedBothSideDocs.includes(kyc.idType) && !documentBack) {
+      //   return res.status(400).json({
+      //     message: "Document back image is required for this ID type.",
+      //   });
+      // }
 
       // Combine KYC data with authenticated user data
       const user = {

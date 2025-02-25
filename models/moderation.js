@@ -98,10 +98,10 @@ const moderationSchema = new mongoose.Schema(
       type: Object,
       default: {},
     },
-    idLiveData: {
-      type: Object,
-      default: {},
-    },
+    // idLiveData: {
+    //   type: Object,
+    //   default: {},
+    // },
     faceRecogData: {
       type: Object,
       default: {},

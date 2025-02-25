@@ -7,7 +7,7 @@ const sanitizeAadharData = (ocrData) => {
     name: ocrData?.name?.replace(/\^/g, "").trim() || "", // Remove special characters like '^'
     dateOfBirth: ocrData?.dateOfBirth || "", // DOB
     firstIssueDate: ocrData?.firstIssueDate || "", // ID issue date
-    address: ocrData?.address?.replace(/\^/g, "").trim() || "", // Remove special characters
+    //address: ocrData?.address?.replace(/\^/g, "").trim() || "", // Remove special characters
   };
   return modOcrData;
 };
@@ -20,11 +20,11 @@ const sanitizeModKycDataAadhar = (kycData) => {
     dateOfBirth: formatDate(kycData?.dob || ""), // DOB
     firstIssueDate: formatDate(kycData?.idIssueDate || ""), // ID issue date
     // Construct address safely
-    address: `${kycData?.addressLine1 || ""}, ${kycData?.addressLine2 || ""}, ${
-      kycData?.city || ""
-    }, ${kycData?.state || ""}, ${kycData?.zipCode || ""}`
-      .replace(/^, |, ,/g, "")
-      .trim(),
+    // address: `${kycData?.addressLine1 || ""}, ${kycData?.addressLine2 || ""}, ${
+    //   kycData?.city || ""
+    // }, ${kycData?.state || ""}, ${kycData?.zipCode || ""}`
+    //   .replace(/^, |, ,/g, "")
+    //   .trim(),
   };
   return modKycData;
 };

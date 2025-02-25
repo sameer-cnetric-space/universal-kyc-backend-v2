@@ -158,26 +158,22 @@ const compareDocumentByType = (documentType, ocrData, kycData) => {
   // Store comparison results with the field names for debugging
   const comparisonResults = Object.keys(sanitizedOcrData).map((field) => {
     let isMatch;
-    let addressSimilarity;
+    //let addressSimilarity;
 
-    if (field === "address") {
-      const address = compareAddressApproximately(
-        sanitizedOcrData[field],
-        sanitizedKycData[field]
-      );
-      isMatch = address?.result;
-      addressSimilarity = address?.similarity;
-    } else {
-      isMatch = compareStrings(
-        sanitizedOcrData[field],
-        sanitizedKycData[field]
-      );
-    }
+    // if (field === "address") {
+    //   const address = compareAddressApproximately(
+    //     sanitizedOcrData[field],
+    //     sanitizedKycData[field]
+    //   );
+    //   isMatch = address?.result;
+    //   addressSimilarity = address?.similarity;
+    // } else {}
+    isMatch = compareStrings(sanitizedOcrData[field], sanitizedKycData[field]);
 
     return {
       field,
       isMatch,
-      addressSimilarity,
+      //addressSimilarity,
       ocrValue: sanitizedOcrData[field],
       kycValue: sanitizedKycData[field],
     };
@@ -195,9 +191,9 @@ const compareDocumentByType = (documentType, ocrData, kycData) => {
           kycValue,
           reason: `Mismatch: OCR value (${ocrValue}) does not match KYC value (${kycValue})`,
         };
-        if (field === "address") {
-          mismatchResults[field].similarityScore = addressSimilarity;
-        }
+        // if (field === "address") {
+        //   mismatchResults[field].similarityScore = addressSimilarity;
+        // }
         // console.log(
         //   `Mismatch: OCR value (${ocrValue}) does not match KYC value (${kycValue})`
         // );
